@@ -246,17 +246,20 @@ Motion blur arises from the temporal integration of a continuous sharp signal ov
       <p class="kicker">Method</p>
       <h2>An image prior that answers a video question.</h2>
       <p class="lead">
-        The network $f_\theta(B(0,1), s, t)$ predicts $B(s,t)$ in the latent space of a frozen VAE. It is fine-tuned from a
-        pretrained image generative transformer (FLUX.2-klein), with the interval $(s,t)$ injected in place of the text conditioning.
-        An image model thus solves a video task, with no video pretraining. Training uses three supervisions derived from the blur integral:
+        The network $f_\theta$ is a diffusion transformer built on the FLUX.2-klein backbone, with a frozen VAE (encoder $\mathcal{E}$, decoder $\mathcal{D}$).
+        The blurry input is encoded as $z_\text{blur} = \mathcal{E}(x_\text{blur})$, and $f_\theta(z_\text{blur}, s, t)$ predicts the latent of $B(s,t)$ as a residual added to $z_\text{blur}$.
+        The interval replaces FLUX's original time conditioning: the triple $(s, t, t-s)$ is sinusoidally embedded, projected by a shared MLP,
+        and injected through the same pathway as the original timestep. An image model thus solves a video task, with no video pretraining.
+        Training uses three supervisions derived from the blur integral:
       </p>
     </div>
 
     <figure class="fig fade-in">
       <div class="fig-light">
-        <img data-pm-asset src="./static/image/method.jpg"
-             alt="Method overview (paper Fig. 2): interval-conditioned network with reconstruction, additivity and sharp-frame losses" />
+        <img data-pm-asset src="./static/image/method.jpg?v=2"
+             alt="Paper Fig. 2: conceptual illustration of the training strategy — reconstruction, additivity and sharp-frame losses" />
       </div>
+      <figcaption>Conceptual illustration of the training strategy of PickMoment (paper Fig. 2).</figcaption>
     </figure>
 
     <div class="method-cards">
