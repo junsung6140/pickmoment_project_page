@@ -1,7 +1,8 @@
 # PickMoment 프로젝트 페이지
 
 목표 주소: `https://junsung6140.github.io/pickmoment_project_page/`
-디자인은 PRISM 페이지(`junsung6140.github.io/prism/`)와 같은 시스템(Bulma + 동일 색/폰트/카드)을 씁니다.
+
+디자인: 어두운 "exposure" 테마 (PRISM·ODDR와 구분). Bulma는 더 이상 쓰지 않음 — `static/css/index.css` 하나로 동작.
 
 ```
 pickmoment_project_page/

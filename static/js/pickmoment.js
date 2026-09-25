@@ -508,7 +508,9 @@
     var bBlur = el('button', 'pm-tab active', 'vs. Blurry input');
     var bFide = el('button', 'pm-tab', 'vs. FideDiff');
     cmp.appendChild(bBlur); cmp.appendChild(bFide);
-    top.appendChild(chips); top.appendChild(cmp);
+    top.appendChild(chips);
+    // Only offer the FideDiff comparison when at least one pair has a FideDiff output
+    if (pairs.some(function (p) { return !!p.fidediff; })) top.appendChild(cmp);
     if (synthetic) {
       var bd = el('span', 'pm-badge', 'Synthetic illustration — not model output');
       top.appendChild(bd);
