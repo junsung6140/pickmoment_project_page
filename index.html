@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="PickMoment: a single deterministic model that learns the interval-mean blur over arbitrary sub-intervals of the exposure, unifying single-image deblurring, blur-to-video, and continuous-time pick-a-moment recovery (NeurIPS 2026).">
+  <meta name="keywords" content="motion deblurring, blur-to-video, continuous time, interval mean, MeanFlow, PickMoment, NeurIPS 2026, computer vision">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="PickMoment: Continuous-Time Single-Image-to-Video via Learning Deblurring and Blur-to-Video">
+  <meta property="og:description" content="One model, queried by time or interval: single-image deblurring, blur-to-video, and pick-a-moment recovery from a single motion-blurred image (NeurIPS 2026).">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://junsung6140.github.io/pickmoment_project_page/">
+  <meta property="og:image" content="https://junsung6140.github.io/pickmoment_project_page/static/image/teaser.jpg">
+
+  <title>PickMoment: Continuous-Time Single-Image-to-Video via Learning Deblurring and Blur-to-Video</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&family=Castoro&display=swap"
+        rel="stylesheet">
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="./static/data.js"></script>
+  <script src="./static/js/pickmoment.js"></script>
+
+  <!-- MathJax -->
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+        displayMath: [ ['$$', '$$'], ['\\[', '\\]'] ],
+        processEscapes: true
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">PickMoment: Continuous-Time Single-Image-to-Video via Learning Deblurring and Blur-to-Video</h1>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://junsung6140.github.io/">Junseong Shin</a> &nbsp;&nbsp;
+              Hyeonsu Jo &nbsp;&nbsp;
+              <a href="https://kdhrick2222.github.io/">Daehyun Kim</a> &nbsp;&nbsp;
+              <a href="https://sites.google.com/view/lliger9/">Tae Hyun Kim</a>
+            </span>
+          </div>
+
+          <!-- TODO: confirm affiliations for all four authors -->
+          <div class="is-size-5 publication-authors" style="margin-top: 6px;">
+            <span class="author-block" style="color: #94A3B8; font-size: 1rem;">
+              Hanyang University, <a href="https://sites.google.com/view/lliger9?pli=1">VILAB</a>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors" style="margin-top: 10px;">
+            <span class="author-block" style="color: #FDE68A; font-size: 1.05rem;">
+              <span style="font-weight:600;">NeurIPS 2026</span>
+            </span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://openreview.net/pdf?id=OLVcmhgg5O"
+                   class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://openreview.net/forum?id=OLVcmhgg5O"
+                   class="external-link button is-normal is-rounded is-dark" target="_blank" rel="noopener">
+                  <span class="icon"><i class="fas fa-comments"></i></span>
+                  <span>OpenReview</span>
+                </a>
+              </span>
+              <!-- TODO: fill href and remove is-disabled once available -->
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark is-disabled" aria-disabled="true">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv<span class="soon">(soon)</span></span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="#" class="external-link button is-normal is-rounded is-dark is-disabled" aria-disabled="true">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code<span class="soon">(soon)</span></span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+<div class="container is-max-desktop">
+<div class="content">
+
+<!-- ═══════════════════════════════════════════════════
+     TEASER + INTERACTIVE DEMO
+     ═══════════════════════════════════════════════════ -->
+<div class="teaser-wrapper fade-in">
+  <img data-pm-asset src="./static/image/teaser.jpg"
+       alt="Teaser figure (paper Fig. 1): deblurring, blur-to-video and arbitrary-time recovery from one blurry image" />
+</div>
+<p class="comparison-caption" style="margin-bottom: 2.5rem;">
+  Given one motion-blurred image, PickMoment answers three kinds of queries with the same network:
+  <strong>(a)</strong> the sharp frame at the exposure center, <strong>(b)</strong> an $N$-frame sharp video,
+  and <strong>(c)</strong> the sharp frame at any moment inside the exposure.
+</p>
+
+<h2 id="demo">Pick a Moment</h2>
+<p>
+  Drag along the exposure timeline. In <em>moment</em> mode the model returns the sharp frame $S(\tau)$ at the chosen instant;
+  in <em>interval</em> mode it returns the interval-mean blur $B(s,t)$, i.e. the photo a camera would have taken
+  had its shutter been open only from $s$ to $t$.
+</p>
+
+<div class="pm-demo fade-in" id="pm-demo">
+  <div class="pm-demo-header">
+    <div class="pm-tabs" role="tablist">
+      <button class="pm-tab active" data-mode="moment" role="tab"><i class="fas fa-crosshairs"></i>&nbsp; Pick a moment</button>
+      <button class="pm-tab" data-mode="interval" role="tab"><i class="fas fa-arrows-alt-h"></i>&nbsp; Pick an interval</button>
+    </div>
+    <span class="pm-badge"></span>
+  </div>
+
+  <div class="thumb-row"></div>
+
+  <div class="pm-panels">
+    <div class="pm-panel">
+      <img class="pm-in-img" alt="Blurry input" />
+      <canvas class="pm-in-canvas"></canvas>
+      <div class="result-label">Blurry input B(0, 1)</div>
+    </div>
+    <div class="pm-panel">
+      <img class="pm-out-img" alt="PickMoment output" />
+      <canvas class="pm-out-canvas"></canvas>
+      <div class="result-label pm-out-label">Sharp frame S(τ)</div>
+      <div class="pm-query"></div>
+    </div>
+  </div>
+
+  <div class="pm-timeline-wrap">
+    <div class="pm-timeline" aria-label="Exposure timeline"></div>
+    <div class="pm-timeline-label">
+      <span>shutter opens (0)</span><span>normalized exposure time</span><span>shutter closes (1)</span>
+    </div>
+  </div>
+
+  <div class="pm-controls">
+    <button class="pm-btn is-primary" data-action="play"><i class="fas fa-play"></i> Sweep τ</button>
+    <button class="pm-btn" data-preset="deblur">Deblur: S(½)</button>
+    <button class="pm-btn" data-preset="first">First half B(0, ½)</button>
+    <button class="pm-btn" data-preset="second">Second half B(½, 1)</button>
+    <button class="pm-btn" data-preset="full">Full exposure B(0, 1)</button>
+    <span class="pm-readout"></span>
+  </div>
+  <p class="pm-demo-note"></p>
+</div>
+
+<hr />
+
+<!-- ═══════════════════════════════════════════════════
+     ABSTRACT
+     Two phrases follow the wording committed in the rebuttal for the camera-ready:
+       "generative-based"                       -> "generative-prior-based"
+       "all in a single forward pass without…"  -> "one forward pass per output frame"
+     Replace with the final camera-ready abstract when it is fixed.
+     ═══════════════════════════════════════════════════ -->
+<div class="columns is-centered has-text-centered">
+  <div class="column is-four-fifths">
+    <h2>Abstract</h2>
+    <div class="content has-text-justified">
+Motion blur arises from the temporal integration of a continuous sharp signal over a finite exposure window, yet existing learning-based methods sidestep this physical model and predict only the sharp signal itself: most single-image deblurring methods recover a single frame at the exposure center, while blur-to-video methods predict a fixed set of frames. We introduce <strong>PickMoment</strong>, a continuous-time reformulation that directly learns the interval-mean blur over arbitrary sub-intervals of the exposure with a single deterministic model. Drawing an analogy to MeanFlow's average-velocity formulation, we train the model with three supervisions derived from the blur integral: an empirical reconstruction loss from available subframes, an additivity loss that enforces self-consistency across overlapping sub-intervals, and a sharp-frame loss anchored at the zero-interval limit. A single trained model unifies single-image deblurring, blur-to-video generation, and continuous-time pick-a-moment recovery as different queries to the same network, with no separate training for each task. Our PickMoment achieves state-of-the-art performance among generative-prior-based deblurring methods on GoPro and HIDE while competitive against restoration-based methods on RealBlur, and the highest per-frame fidelity on GoPro-7 blur-to-video, all with one forward pass per output frame and no iterative sampling.
+    </div>
+  </div>
+</div>
+
+<div class="pm-stats fade-in">
+  <div class="pm-stat">
+    <div class="num">+1.23 dB</div>
+    <div class="lbl">PSNR<sub>p</sub> over Blur2Vid on GoPro-7 blur-to-video</div>
+  </div>
+  <div class="pm-stat">
+    <div class="num">+1.35 dB</div>
+    <div class="lbl">mean PSNR over Blur2Vid at 33 timestamps per exposure<br/>(X4K1000FPS, unseen in training)</div>
+  </div>
+  <div class="pm-stat">
+    <div class="num">≈25×</div>
+    <div class="lbl">faster than Blur2Vid: 7.90 s for a full 7-frame sequence<br/>(one forward pass per frame)</div>
+  </div>
+</div>
+
+<hr />
+
+<!-- ═══════════════════════════════════════════════════
+     KEY IDEA
+     ═══════════════════════════════════════════════════ -->
+<h2 id="key-idea">Key Idea: One Function, Many Queries</h2>
+
+<p>
+  A motion-blurred photo is the average of the sharp scene over the exposure. PickMoment learns this averaging
+  <em>for every sub-interval</em>, not only for the full exposure:
+</p>
+$$
+B(s,t) \;=\; \frac{1}{t-s}\int_{s}^{t} S(u)\,\mathrm{d}u
+$$
+<p>
+  for any $0 \le s < t \le 1$ in normalized exposure time. The observed blurry image is $B(0,1)$, and as the interval shrinks, $B(s,t)$ converges to the sharp frame
+  $S(\tau)$ at that instant. Every task becomes a query to the same network:
+</p>
+
+<div class="pm-query-grid fade-in">
+  <div class="pm-query-card">
+    <div class="q-title"><i class="fas fa-bullseye"></i>&nbsp; Single-image deblurring</div>
+    <div class="q-formula">$S(\tfrac12)$</div>
+    <div class="q-desc">A zero-width query at the exposure center. One forward pass.</div>
+  </div>
+  <div class="pm-query-card">
+    <div class="q-title"><i class="fas fa-film"></i>&nbsp; Blur-to-video</div>
+    <div class="q-formula">$\{S(\tau_i)\}_{i=0}^{N-1},\ \tau_i = \tfrac{i}{N-1}$</div>
+    <div class="q-desc">$N$ zero-width queries on the same input: one forward pass per output frame, issued as a single batch.</div>
+  </div>
+  <div class="pm-query-card">
+    <div class="q-title"><i class="fas fa-hand-pointer"></i>&nbsp; Pick-a-moment</div>
+    <div class="q-formula">$S(\tau)$ or $B(s,t)$</div>
+    <div class="q-desc">Any instant inside the exposure, or the blur of any sub-exposure. The other two tasks are special cases of this one.</div>
+  </div>
+</div>
+
+<div class="key-insight fade-in">
+  <div class="key-insight-label">Relation to MeanFlow</div>
+  MeanFlow learns the time-average of an instantaneous velocity, so that one network evaluation replaces integration over an interval.
+  PickMoment applies the same interval-averaging operator to a different quantity: sharp frames over exposure time.
+  What carries over is the structure of an interval mean, namely additivity across sub-intervals and the zero-width limit.
+  The stochastic noise-to-data sampling of MeanFlow does not: PickMoment builds on a pretrained generative prior but runs
+  deterministically, so it does not retain the sampling-based generative capability. Because the interval mean of sharp frames
+  is the observation itself, it can also be supervised directly.
+</div>
+
+<hr />
+
+<!-- ═══════════════════════════════════════════════════
+     METHOD
+     ═══════════════════════════════════════════════════ -->
+<h2 id="method">Method</h2>
+
+<div class="figure-wrapper fade-in">
+  <img data-pm-asset src="./static/image/method.jpg"
+       alt="Method overview (paper Fig. 2): interval-conditioned network with reconstruction, additivity and sharp-frame losses" />
+</div>
+
+<p>
+  The network $f_\theta(B(0,1), s, t)$ predicts $B(s,t)$ in the latent space of a frozen VAE. It is fine-tuned from a
+  pretrained image generative transformer (FLUX.2-klein), with the interval $(s,t)$ injected in place of the text conditioning.
+  An image model thus solves a video task, with no video pretraining. Training uses three supervisions derived from the blur integral:
+</p>
+
+<div class="method-cards is-three">
+  <div class="method-card">
+    <div class="method-card-title">Reconstruction $\mathcal{L}_\text{recon}$</div>
+    <div class="method-card-desc">Supervises $B(s,t)$ on sampled sub-intervals with the empirical mean of the available subframes.</div>
+  </div>
+  <div class="method-card">
+    <div class="method-card-title">Additivity $\mathcal{L}_\text{add}$</div>
+    <div class="method-card-desc">
+      For every split point $m$, an interval mean is the length-weighted average of its two parts:
+      \[ \begin{aligned} B(s,t) = {} & \tfrac{m-s}{t-s}\,B(s,m) \\ & + \tfrac{t-m}{t-s}\,B(m,t). \end{aligned} \]
+      Enforcing it ties all sub-interval predictions on one input into a single consistent trajectory.
+    </div>
+  </div>
+  <div class="method-card">
+    <div class="method-card-title">Sharp frame $\mathcal{L}_\text{sharp}$</div>
+    <div class="method-card-desc">
+      Anchors zero-width queries $B(\tau,\tau)$ to the sharp frame $S(\tau)$, supervised in pixel space after decoding.
+    </div>
+  </div>
+</div>
+
+<hr />
+
+<!-- ═══════════════════════════════════════════════════
+     BLUR-TO-VIDEO
+     ═══════════════════════════════════════════════════ -->
+<h2 id="blur-to-video">Blur-to-Video</h2>
+
+<div id="pm-videos" class="fade-in"></div>
+
+<h3>GoPro-7</h3>
+<div class="pm-table-wrap">
+<table class="pm-table">
+  <thead>
+    <tr><th>Method</th><th>PSNR<sub>p</sub> ↑</th><th>SSIM<sub>p</sub> ↑</th><th>LPIPS<sub>p</sub> ↓</th><th>FVD ↓</th><th>EPE ↓</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Jin et al.</td><td>25.23</td><td>0.8190</td><td>0.084</td><td>235.53</td><td>3.38</td></tr>
+    <tr><td>MotionETR</td><td>26.54</td><td>0.8825</td><td>0.015</td><td>94.90</td><td>1.46</td></tr>
+    <tr><td>Blur2Vid</td><td>30.01</td><td>0.9359</td><td>0.012</td><td><strong>21.46</strong></td><td><strong>0.39</strong></td></tr>
+    <tr class="is-ours"><td>PickMoment (Ours)</td><td><strong>31.24</strong></td><td><strong>0.9388</strong></td><td><strong>0.0086</strong></td><td>27.40</td><td>0.86</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="pm-table-caption">
+  Bidirectional patch-based metrics following the Blur2Vid protocol. Baseline numbers are from the respective papers.
+</p>
+
+<div class="key-insight">
+  <div class="key-insight-label">Trade-off</div>
+  PickMoment leads on per-frame fidelity (PSNR<sub>p</sub>, SSIM<sub>p</sub>, LPIPS<sub>p</sub>). Blur2Vid leads on FVD and EPE,
+  the two metrics that judge the sequence as a whole. This follows from the prior: Blur2Vid fine-tunes a video diffusion model
+  (CogVideoX-2B) and samples the whole sequence jointly, while PickMoment uses an image-only prior with no cross-frame attention and
+  answers each query independently. Against every other baseline, PickMoment's FVD and EPE are far ahead.
+</div>
+
+<h3>Temporal consistency</h3>
+<div class="pm-table-wrap">
+<table class="pm-table">
+  <thead>
+    <tr><th>Sequence</th><th>warp L1</th><th>warp PSNR</th><th>vs. ground truth</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Ground truth (natural motion)</td><td>0.0096</td><td>35.23</td><td>—</td></tr>
+    <tr class="is-ours"><td>PickMoment (Ours)</td><td>0.0089</td><td>36.49</td><td>closest to GT</td></tr>
+    <tr><td>Blur2Vid</td><td>0.0072</td><td>37.77</td><td>smoother than GT</td></tr>
+    <tr><td>Jin et al.</td><td>0.0106</td><td>34.52</td><td>rougher than GT</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="pm-table-caption">
+  Each recovered frame is warped onto the next along RAFT flow and the photometric residual is measured, on all 1,744 GoPro-7 clips.
+  PickMoment's frame-to-frame change matches natural motion, with no measurable flicker.
+</p>
+
+<h3>Denser timestamps on unseen data</h3>
+<div class="pm-table-wrap">
+<table class="pm-table">
+  <thead>
+    <tr><th>$t/T$</th><th>0.000</th><th>0.125</th><th>0.250</th><th>0.375</th><th>0.500</th><th>0.625</th><th>0.750</th><th>0.875</th><th>1.000</th><th>33-pt mean</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Blur2Vid</td><td>21.31</td><td>20.30</td><td>19.99</td><td>22.92</td><td>21.46</td><td>22.47</td><td>21.95</td><td>21.53</td><td>21.30</td><td>21.60</td></tr>
+    <tr class="is-ours"><td>PickMoment (Ours)</td><td>22.09</td><td>22.39</td><td>23.29</td><td>23.65</td><td>24.07</td><td>23.61</td><td>22.89</td><td>21.82</td><td>21.60</td><td>22.95</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="pm-table-caption">
+  PSNR on X4K1000FPS (X-TEST, 15 clips). Each blur averages 33 consecutive 1000-fps frames, leaving ground truth at 33 timestamps per exposure.
+  Both models are applied zero-shot from their GoPro-trained weights; PickMoment leads at every one of the 33 timestamps (9 shown).
+</p>
+
+<hr />
+
+<!-- ═══════════════════════════════════════════════════
+     SINGLE-IMAGE DEBLURRING
+     ═══════════════════════════════════════════════════ -->
+<h2 id="deblurring">Single-Image Deblurring</h2>
+
+<div id="pm-deblur" class="fade-in"></div>
+
+<!-- TODO: verify every cell against camera-ready Table 1. GoPro/Ours is confirmed by the rebuttal;
+     the remaining cells were copied from the local main.tex draft. -->
+<div class="pm-table-wrap">
+<table class="pm-table">
+  <thead>
+    <tr><th rowspan="2">Method</th><th colspan="4">GoPro</th><th colspan="4">HIDE</th></tr>
+    <tr><th>PSNR ↑</th><th>SSIM ↑</th><th>LPIPS ↓</th><th>DISTS ↓</th><th>PSNR ↑</th><th>SSIM ↑</th><th>LPIPS ↓</th><th>DISTS ↓</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>FideDiff</td><td>28.79</td><td>0.9148</td><td>0.0831</td><td>0.0525</td><td>27.28</td><td>0.8775</td><td>0.1068</td><td>0.0647</td></tr>
+    <tr class="is-ours"><td>PickMoment (Ours)</td><td>29.43</td><td>0.9253</td><td>0.0802</td><td>0.0429</td><td>27.52</td><td>0.8889</td><td>0.1043</td><td>0.0551</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="pm-table-caption">
+  Comparison with FideDiff, the strongest generative-prior-based baseline. Across GoPro, HIDE, RealBlur-J and RealBlur-R,
+  PickMoment is ahead on 12 of 16 metric cells; the full table with regression-based methods is in the paper.
+  Deblurring uses the same model as blur-to-video, queried at $\tau = \tfrac12$.
+</p>
+
+<hr />
+
+<!-- ═══════════════════════════════════════════════════
+     ANALYSIS
+     ═══════════════════════════════════════════════════ -->
+<h2 id="analysis">What Does the Interval-Mean Formulation Add?</h2>
+
+<p>
+  <strong>Same backbone, different target.</strong> With backbone, data and budget fixed, and only a latent reconstruction loss
+  (no sharp-frame or perceptual loss), predicting the interval mean beats predicting a single sharp frame by 0.73 dB
+  and a fixed set of $N$ frames by 0.69 dB in deblurring PSNR (0.62 / 0.52 dB in PSNR<sub>p</sub>).
+</p>
+<p>
+  <strong>Sharp-frame loss alone.</strong> Training with $\mathcal{L}_\text{sharp}$ only, so that no interval-mean supervision remains,
+  nearly matches the full objective on deblurring but falls well behind on the video metrics. The formulation's contribution is temporal.
+</p>
+
+<div class="pm-table-wrap">
+<table class="pm-table">
+  <thead>
+    <tr><th>GoPro</th><th>deblur PSNR</th><th>SSIM</th><th>LPIPS</th><th>DISTS</th><th>PSNR<sub>p</sub></th><th>SSIM<sub>p</sub></th><th>LPIPS<sub>p</sub></th><th>FVD</th><th>EPE</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>$\mathcal{L}_\text{sharp}$ only</td><td>29.06</td><td>0.9208</td><td>0.0812</td><td>0.0438</td><td>30.17</td><td>0.9186</td><td>0.0104</td><td>38.07</td><td>1.33</td></tr>
+    <tr class="is-ours"><td>Full objective</td><td><strong>29.43</strong></td><td><strong>0.9253</strong></td><td><strong>0.0802</strong></td><td><strong>0.0429</strong></td><td><strong>31.24</strong></td><td><strong>0.9388</strong></td><td><strong>0.0086</strong></td><td><strong>27.40</strong></td><td><strong>0.86</strong></td></tr>
+  </tbody>
+</table>
+</div>
+
+<hr />
+
+<!-- ═══════════════════════════════════════════════════
+     CITATION
+     ═══════════════════════════════════════════════════ -->
+<h2 id="citation">Citation</h2>
+
+<div class="citation-block">
+<button class="copy-btn" onclick="copyBibtex()">
+  <i class="fas fa-copy"></i> Copy BibTeX
+</button>
+<pre><code id="bibtex">@inproceedings{shin2026pickmoment,
+    title={PickMoment: Continuous-Time Single-Image-to-Video via Learning Deblurring and Blur-to-Video},
+    author={Junseong Shin and Hyeonsu Jo and Daehyun Kim and Tae Hyun Kim},
+    booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+    year={2026}
+}</code></pre>
+</div>
+
+</div>
+</div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content" style="text-align: center;">
+          <p>
+            Website template borrowed from <a href="https://github.com/nerfies/nerfies.github.io">NeRFies</a> and <a href="https://github.com/shunzh/project_website">the Jekyll fork</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

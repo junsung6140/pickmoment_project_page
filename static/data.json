@@ -1,0 +1,10 @@
+{
+  "demo": {
+    "tauSteps": 32,
+    "intervalSteps": 8,
+    "includeToy": true,
+    "scenes": []
+  },
+  "videos": [],
+  "deblur": []
+}
