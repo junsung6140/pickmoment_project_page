@@ -72,18 +72,21 @@
     <div class="affil">Hanyang University, <a href="https://sites.google.com/view/lliger9?pli=1">VILAB</a></div>
 
     <div class="cta">
-      <a class="btn btn-primary" href="https://openreview.net/pdf?id=OLVcmhgg5O" target="_blank" rel="noopener">
-        <i class="fas fa-file-pdf"></i> Paper
+      <!-- OpenReview is not public yet (Readers exclude "Everyone").
+           When public: restore href="https://openreview.net/pdf?id=OLVcmhgg5O" (Paper, btn-primary)
+           and href="https://openreview.net/forum?id=OLVcmhgg5O" (OpenReview), and remove is-disabled. -->
+      <a class="btn is-disabled" href="#" aria-disabled="true">
+        <i class="fas fa-file-pdf"></i> Paper <span class="soon">coming soon</span>
       </a>
-      <a class="btn" href="https://openreview.net/forum?id=OLVcmhgg5O" target="_blank" rel="noopener">
-        <i class="fas fa-comments"></i> OpenReview
+      <a class="btn is-disabled" href="#" aria-disabled="true">
+        <i class="fas fa-comments"></i> OpenReview <span class="soon">coming soon</span>
       </a>
       <!-- TODO: fill href and remove is-disabled once available -->
       <a class="btn is-disabled" href="#" aria-disabled="true">
-        <i class="ai ai-arxiv"></i> arXiv <span class="soon">soon</span>
+        <i class="ai ai-arxiv"></i> arXiv <span class="soon">coming soon</span>
       </a>
       <a class="btn is-disabled" href="#" aria-disabled="true">
-        <i class="fab fa-github"></i> Code <span class="soon">soon</span>
+        <i class="fab fa-github"></i> Code <span class="soon">coming soon</span>
       </a>
     </div>
   </div>
