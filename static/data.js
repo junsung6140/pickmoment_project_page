@@ -31,6 +31,9 @@ window.PM_DATA = {
         "dir": "static/results/demo/GOPR0862_11_00_seq0053",
         "input": "static/results/demo/GOPR0862_11_00_seq0053/input.jpg"
       }
+    ],
+    "skipTau": [
+      31
     ]
   },
   "videos": [

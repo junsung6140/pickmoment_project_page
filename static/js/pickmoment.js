@@ -177,9 +177,28 @@
     function cur() { return scenes[state.scene]; }
     function minGap() { return cur().toy ? 1 / 64 : 1 / intSteps; }
     function snap(v, steps) { return Math.round(v * steps) / steps; }
+    // tau grid indices to hide (e.g. frames that look wrong), set via data.json "skipTau"
+    var skipTau = (cfg.skipTau || []).map(Number);
+    function tauOk(k) { return k >= 0 && k <= tauSteps && skipTau.indexOf(k) < 0; }
+    function snapTau(v) {
+      var x = clamp(v, 0, 1) * tauSteps, k = Math.round(x);
+      if (tauOk(k)) return k / tauSteps;
+      // nearest allowed index; ties go toward the side v lies on
+      for (var d = 1; d <= tauSteps; d++) {
+        var a = x >= k ? k + d : k - d, b = x >= k ? k - d : k + d;
+        if (tauOk(a)) return a / tauSteps;
+        if (tauOk(b)) return b / tauSteps;
+      }
+      return snap(v, tauSteps);
+    }
+    function stepTau(v, dir) {
+      var k = Math.round(v * tauSteps) + dir;
+      while (k >= 0 && k <= tauSteps && !tauOk(k)) k += dir;
+      return clamp(k, 0, tauSteps) / tauSteps;
+    }
     function snapScene(v, kind) {
       if (cur().toy) return snap(v, 128);
-      return snap(v, kind === 'tau' ? tauSteps : intSteps);
+      return kind === 'tau' ? snapTau(v) : snap(v, intSteps);
     }
 
     function drawTicks() {
@@ -203,7 +222,7 @@
     function intSrc(sc, i, j) { return sc.dir + '/int_' + pad2(i) + '_' + pad2(j) + '.jpg'; }
     function preloadScene(sc) {
       if (sc.toy) return;
-      for (var k = 0; k <= tauSteps; k++) preload(tauSrc(sc, k));
+      for (var k = 0; k <= tauSteps; k++) if (tauOk(k)) preload(tauSrc(sc, k));
       for (var i = 0; i < intSteps; i++)
         for (var j = i + 1; j <= intSteps; j++) preload(intSrc(sc, i, j));
     }
@@ -342,8 +361,9 @@
         var name = state.mode === 'moment' ? 'tau' : which;
         var step = cur().toy ? 1 / 64 : (name === 'tau' ? 1 / tauSteps : 1 / intSteps);
         var v = name === 'tau' ? state.tau : state[name];
-        if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { applyValue(name, v + step); ev.preventDefault(); }
-        if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') { applyValue(name, v - step); ev.preventDefault(); }
+        var realTau = name === 'tau' && !cur().toy;
+        if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { applyValue(name, realTau ? stepTau(v, 1) : v + step); ev.preventDefault(); }
+        if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') { applyValue(name, realTau ? stepTau(v, -1) : v - step); ev.preventDefault(); }
       };
     }
     h1.addEventListener('keydown', keyHandler('s'));
