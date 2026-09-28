@@ -378,3 +378,6 @@ mjx-container { color: inherit; }
   .thumb { width: 64px; height: 38px; }
   .fig-light { padding: 10px; }
 }
+
+/* first sub-heading right after a section title */
+.section h2 + h3 { margin-top: 36px; }
